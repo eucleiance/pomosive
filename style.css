@@ -17,8 +17,11 @@ html {
 
 html.dark {
   /* When html has a .dark class, assign these variables */
-  --primary-color: white;
-  --secondary-color: #333;
+  /* --primary-color: white; */
+  /* --secondary-color: #333; */
+  --primary-color: #333;
+  --secondary-color: white;
+
 }
 
 html.dark {
