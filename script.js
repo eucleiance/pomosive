@@ -1,3 +1,40 @@
+// 5 Ratings 
+// Distracted -> I want to or started doing smth else
+// Okay-ish -> I'm sort of exploring my work
+// Focused - Getting the hang of it -> I'm not reaching for my phone
+// Flow - I'm highly motivated -> I don't wanna take a break
+
+// Start with 5 min work block
+// Rate it
+// If Distracted, Lower Work Block Time - by 1/2 -> 2.5 mins
+// Rate it 
+// If Okay-ish -> Bump it up by 4x to 10 mins -> After a break of 1/3 of the work block
+// Rate it 
+// If Okay-ish -> Bump it up by 2x to 20 mins -> After a break of 1/3 of the work block
+// Rate it 
+// If Flowing -> Bump it up by 2x to 40 mins -> After a break of 1/3 of the work block
+// Rate it-
+// If the pomo has been going on for 90 mins -> Forcibly initiate a break of 30 mins
+
+// Increment Rules
+// Distracted -> Divide by 2 
+
+// Okay-ish
+// 2.5 mins -> 10 mins -> 3 mins  -> 5 mins
+// 10 mins  -> 20 mins -> 6 mins  -> 10 mins
+// 20 mins  -> 40 mins -> 13 mins -> 15 mins
+// 40 mins  -> 90 mins -> 30 mins -> 30 mins
+
+// Focused 
+// 2.5 mins -> 10 mins -> No Break
+// 10 mins  -> 20 mins -> No Break
+// 20 mins  -> 40 mins -> No Break
+
+// Break Tip
+// Do something that is autonomous and doesn't require any thinking
+
+
+// Analog Clock
 const hourEl = document.querySelector(".hour");
 const minuteEl = document.querySelector(".minute");
 const secondEl = document.querySelector(".second");
@@ -9,6 +46,138 @@ let timer = null;
 let startTime = 0;
 let elapsedTime = 0;
 let isRunning = false;
+
+// Pomodoro
+let work_block = 0;
+let break_block = 0;
+let f_rating = "Distracted"            // Distracted / OK / Focused / Flow
+
+let run_time_i = 38;
+let total_run_time_i = 0;
+let focus_rating_i = "Distracted";
+pomo(run_time_i, total_run_time_i, focus_rating_i);
+
+// let run_time_j = 20;
+// console.log(break_block_calc(run_time_j));
+
+function pomo(run_time, total_run_time, focus_rating) {
+  switch (focus_rating) {
+    case "Distracted":
+      total_run_time_i = 0;
+      console.log("Dist. Starting new work block of", distracted_work_block_calc(run_time), "After a break of ", break_block_calc(run_time), " mins")
+      break;
+
+    case "OK":
+      total_run_time_i = 0;
+      // if (ok_work_block_calc(total_run_time) == 0) {
+      //   console.log("OK. Starting the break for", break_block_calc(run_time), " mins");
+      // }
+      // else {
+      console.log("OK. Starting new work block for", ok_work_block_calc(run_time), "after a break of", break_block_calc(total_run_time_i), " mins");
+      // }
+      break;
+
+    case "Focused":
+      if (focused_work_block_calc(total_run_time, run_time) == 0) {
+        console.log("Foc. Starting a break for ", break_block_calc(total_run_time), " mins")
+        total_run_time_i = 0;
+      }
+      else {
+        console.log("Foc. Resuming Work Block for ", focused_work_block_calc(total_run_time, run_time), " mins")
+      }
+      break;
+
+    case "Flow":
+      if (flow_work_block_calc(total_run_time) == 0) {
+        console.log("Flo. Reached Max Focus Time, Starting a break for ", break_block_calc(total_run_time), " mins")
+        total_run_time_i = 0;
+      }
+      else {
+        console.log("Flo. Starting Work Block for ", flow_work_block_calc(total_run_time), " mins")
+      }
+      break;
+  }
+}
+
+
+function distracted_work_block_calc(prev_rtime) {
+  if (prev_rtime <= 5) {
+    return 2.5;
+  }
+  else {
+    console.log((prev_rtime - (prev_rtime / 3)));
+    return multiple_of_5(prev_rtime - (prev_rtime / 3));
+  }
+}
+
+function multiple_of_5(number) {
+  if (number % 5 >= 2.5) {
+    return Math.ceil(number / 5) * 5;
+  } else {
+    return Math.floor(number / 5) * 5;
+  }
+}
+
+function flow_work_block_calc(total_run_time) {
+  if (total_run_time = 90) {
+    return 0;
+  }
+  else {
+    return (90 - total_run_time);
+  }
+}
+
+function focused_work_block_calc(total_rtime, prev_rtime) {
+  if (total_rtime = 90) {
+    return 0;
+  }
+  else if ((prev_rtime * 2) > 90) {
+    return (90 - total_rtime);
+  }
+  else {
+    return prev_rtime * 2;
+  }
+}
+
+function ok_work_block_calc(r_time) {
+  if (r_time <= 10) {
+    return 10;
+  }
+  else if (r_time > 10 && r_time <= 90) {
+    if ((r_time * 2) >= 90) {
+      return 90;
+    }
+    else {
+      return r_time * 2;
+    }
+  }
+}
+
+
+function break_block_calc(r_time) {
+  if (r_time <= 10) {
+    return 2.5;
+  }
+  else if (r_time > 10 && r_time <= 20) {
+    return 5;
+  }
+  else if (r_time > 20 && r_time <= 30) {
+    return 10;
+  }
+  else if (r_time > 30 && r_time <= 40) {
+    return 15;
+  }
+  else if (r_time > 40 && r_time <= 50) {
+    return 20;
+  }
+  else if (r_time > 50 && r_time <= 60) {
+    return 25;
+  }
+  else if (r_time > 60 && r_time <= 90) {
+    return 30;
+  }
+}
+
 
 function start() {
   if (!isRunning) {
@@ -60,6 +229,7 @@ function update() {
   secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
 
   timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+
 }
 
 
