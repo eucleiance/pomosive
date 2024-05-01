@@ -68,15 +68,14 @@ for (let i = 1; i < 99; i += 0.5) {
 }
 
 function test() {
-  let pomo_timer_c = Date.now() + (pomo_timer * 60 * 1000)
   let time_in_mins = (pomo_timer_c - Date.now()) / 60000
   console.log(Date.now())
   console.log(time_in_mins)
 }
-
 function start() {
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
+    pomo_timer_c = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
     timer = setInterval(update, 10);
     isRunning = true;
   }
@@ -88,27 +87,22 @@ function stop() {
     isRunning = false;
   }
 }
-
 function reset() {
   clearInterval(timer);
   startTime = 0;
   elapsedTime = 0;
   isRunning = false;
   timeEl.innerHTML = `00:00:00:00`
-
   hourEl.style.transform = null;
   minuteEl.style.transform = null;
   secondEl.style.transform = null;
-
-  // hourEl.style.transform = "translate(-50%, -100%) rotate(0deg);"
-  // minuteEl.style.transform = "translate(-50%, -100%) rotate(0deg);"
-  // secondEl.style.transform = "translate(-50%, -100%) rotate(0deg);"
 }
 
 
 function update() {
-  const currentTime = Date.now();
-  elapsedTime = currentTime - startTime;
+  const currentTime = Date.now()
+  elapsedTime = pomo_timer_c - currentTime;
+
   let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
   let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
   let seconds = Math.floor(elapsedTime / 1000 % 60);
@@ -123,9 +117,7 @@ function update() {
   hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
   minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
   secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
-
   timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
-
 }
 
 
