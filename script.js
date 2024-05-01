@@ -48,7 +48,7 @@ let elapsedTime = 0;
 let isRunning = false;
 
 // Pomodoro
-let pomo_timer = 5;
+let pomo_timer = 0.1;
 let pomo_timer_c = 0;
 
 let work_block = 0;
@@ -60,17 +60,15 @@ let total_run_time_i = 0;
 let focus_rating_i = "Flow";
 // pomo(run_time_i, total_run_time_i, focus_rating_i);
 
-
-
 for (let i = 1; i < 99; i += 0.5) {
   console.log(i, "mins")
   pomo(i, i, focus_rating_i);
 }
 
 function test() {
-  let time_in_mins = (pomo_timer_c - Date.now()) / 60000
+  // let time_in_mins = (pomo_timer_c - Date.now()) / 60000
   console.log(Date.now())
-  console.log(time_in_mins)
+  console.log((elapsedTime / 60000) % 60)
 }
 function start() {
   if (!isRunning) {
@@ -84,6 +82,7 @@ function stop() {
   if (isRunning) {
     clearInterval(timer);
     elapsedTime = Date.now() - startTime;
+    console.log(elapsedTime / 1000);
     isRunning = false;
   }
 }
@@ -100,26 +99,43 @@ function reset() {
 
 
 function update() {
-  const currentTime = Date.now()
-  elapsedTime = pomo_timer_c - currentTime;
+  try {
+    const currentTime = Date.now()
+    elapsedTime = pomo_timer_c - currentTime;
+    if (elapsedTime < 0) {
+      throw "Timer End";
+    }
 
-  let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-  let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-  let seconds = Math.floor(elapsedTime / 1000 % 60);
-  let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+    let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+    let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+    let seconds = Math.floor(elapsedTime / 1000 % 60);
+    let milliseconds = Math.floor(elapsedTime % 1000 / 10);
 
-  hours = String(hours).padStart(2, "0");
-  minutes = String(minutes).padStart(2, "0");
-  seconds = String(seconds).padStart(2, "0");
-  milliseconds = String(milliseconds).padStart(2, "0");
-  milliseconds = milliseconds.slice(-2);
+    hours = String(hours).padStart(2, "0");
+    minutes = String(minutes).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+    milliseconds = String(milliseconds).padStart(2, "0");
+    milliseconds = milliseconds.slice(-2);
 
-  hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
-  minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
-  secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
-  timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+    hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
+    minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
+    secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
+    timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+
+
+  } catch (end) {
+    console.log(end)
+  }
 }
 
+function reset_or_not(rating) {
+  if (rating == "distracted" || rating == "ok") {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
 
 toggleEl.addEventListener("click", (e) => {
   const html = document.querySelector("html");
