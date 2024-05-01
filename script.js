@@ -54,14 +54,11 @@ let f_rating = "Distracted"            // Distracted / OK / Focused / Flow
 
 let run_time_i = 38;
 let total_run_time_i = 0;
-let focus_rating_i = "Focused";
+let focus_rating_i = "Flow";
 // pomo(run_time_i, total_run_time_i, focus_rating_i);
 
-// let run_time_j = 20;
-// console.log(break_block_calc(run_time_j));
 
-for (let i = 1; i < 99; i++) {
-  // console.log(i, "-> CRT", Math.trunc((i - (i / 3)) * 100) / 100, "-> (CRT / 3)");
+for (let i = 1; i < 99; i += 0.5) {
   console.log(i, "mins")
   pomo(i, i, focus_rating_i);
 }
@@ -77,21 +74,16 @@ function pomo(run_time, total_run_time, focus_rating) {
 
     case "OK":
       total_run_time_i = 0;
-      // if (ok_work_block_calc(total_run_time) == 0) {
-      //   console.log("OK. Starting the break for", break_block_calc(run_time), " mins");
-      // }
-      // else {
       console.log("OK. Starting new work block for", ok_work_block_calc(run_time), "after a break of", break_block_calc(run_time), " mins");
-      // }
       break;
 
     case "Focused":
-      if (focused_work_block_calc(total_run_time, run_time) == 0) {
+      if (focused_work_block_calc(total_run_time) == 0) {
         console.log("Foc. Starting a break for 30 mins")
         total_run_time_i = 0;
       }
       else {
-        console.log("Foc. Resuming Work Block for ", focused_work_block_calc(total_run_time, run_time), " mins")
+        console.log("Foc. Resuming Work Block for ", focused_work_block_calc(total_run_time), " mins")
       }
       break;
 
@@ -107,85 +99,65 @@ function pomo(run_time, total_run_time, focus_rating) {
   }
 }
 
-function focused_work_block_calc(total_rtime) {
+// Distracted Function
+function distracted_work_block_calc(prev_rtime) {
+  if (prev_rtime <= 1) {
+    return 1;
+  }
+  else {
+    return Math.ceil((prev_rtime * 0.5) * 2) / 2;
+  }
+}
 
+// OK Function
+function ok_work_block_calc(r_time) {
+  if (r_time <= 90) {
+    if ((r_time * 1.5) > 90) {
+      return 90;
+    }
+    else {
+      return Math.ceil((r_time * 1.5) * 2) / 2;
+    }
+  }
+  else {
+    return 90;
+  }
+}
+
+// Focused Function 
+function focused_work_block_calc(total_rtime) {
   if (total_rtime >= 90) {
     return 0;
   }
   else if ((total_rtime * 2) > 90) {
-    return multiple_of_5(90 - total_rtime);
+    return Math.ceil((90 - total_rtime) * 2) / 2;
   }
   else {
-    return Math.ceil(((total_rtime * 2) / 5) * 5);
+    return Math.ceil((total_rtime * 2) * 2) / 2;
   }
 }
 
-
-function distracted_work_block_calc(prev_rtime) {
-  if (prev_rtime <= 5) {
-    return 2.5;
-  }
-  else {
-    // console.log((prev_rtime - (prev_rtime / 3)));
-    return multiple_of_5(prev_rtime - (prev_rtime / 3));
-  }
-}
-
-function ok_work_block_calc(r_time) {
-  if (r_time <= 10) {
-    return 10;
-  }
-  else if (r_time > 10 && r_time <= 90) {
-    if ((r_time * 1.5) >= 90) {
-      return 90;
-    }
-    else {
-      return multiple_of_5(r_time * 1.5);
-    }
-  }
-}
-
-function multiple_of_5(number) {
-  if (number % 5 >= 2.5) {
-    return Math.ceil(number / 5) * 5;
-  } else {
-    return Math.floor(number / 5) * 5;
-  }
-}
-
-function flow_work_block_calc(total_run_time) {
-  if (total_run_time = 90) {
+// Flow Function
+function flow_work_block_calc(total_rtime) {
+  if (total_rtime >= 90) {
     return 0;
   }
   else {
-    return (90 - total_run_time);
+    return Math.ceil((90 - total_rtime) * 2) / 2;
   }
 }
 
-
+// Break Function
 function break_block_calc(r_time) {
-  if (r_time <= 10) {
-    return 2.5;
-  }
-  else if (r_time > 10 && r_time <= 20) {
-    return 5;
-  }
-  else if (r_time >= 20 && r_time < 30) {
-    return 10;
-  }
-  else if (r_time >= 30 && r_time < 40) {
-    return 15;
-  }
-  else if (r_time >= 40 && r_time < 50) {
-    return 20;
-  }
-  else if (r_time >= 50 && r_time < 60) {
-    return 25;
-  }
-  else if (r_time => 60 && r_time <= 90) {
+  let break_block = Math.ceil((r_time * 0.33) * 2) / 2
+  if (break_block > 30) {
     return 30;
   }
+  else {
+    return break_block;
+  }
 }
+
 
 
 function start() {
