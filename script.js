@@ -48,8 +48,10 @@ let elapsedTime = 0;
 let isRunning = false;
 
 // Pomodoro
-let pomo_timer = 0.1;
+const pomo_timer_const = 0.1;
+let pomo_timer = pomo_timer_const;
 let pomo_timer_c = 0;
+let pomo_timer_total = 0;
 
 let work_block = 0;
 let break_block = 0;
@@ -99,33 +101,32 @@ function reset() {
 
 
 function update() {
-  try {
-    const currentTime = Date.now()
-    elapsedTime = pomo_timer_c - currentTime;
-    if (elapsedTime < 0) {
-      throw "Timer End";
-    }
-
-    let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-    let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-    let seconds = Math.floor(elapsedTime / 1000 % 60);
-    let milliseconds = Math.floor(elapsedTime % 1000 / 10);
-
-    hours = String(hours).padStart(2, "0");
-    minutes = String(minutes).padStart(2, "0");
-    seconds = String(seconds).padStart(2, "0");
-    milliseconds = String(milliseconds).padStart(2, "0");
-    milliseconds = milliseconds.slice(-2);
-
-    hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
-    minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
-    secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
-    timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
-
-
-  } catch (end) {
-    console.log(end)
+  const currentTime = Date.now()
+  pomo_timer_total = (pomo_timer_total + 1);
+  elapsedTime = pomo_timer_c - currentTime;
+  if (elapsedTime <= 0) {
+    clearInterval(timer);
+    console.log("Timer End");
+    console.log((pomo_timer_total / 100), "seconds");
+    elapsedTime = 0;
+    isRunning = false;
   }
+
+  let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+  let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+  let seconds = Math.floor(elapsedTime / 1000 % 60);
+  let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+
+  hours = String(hours).padStart(2, "0");
+  minutes = String(minutes).padStart(2, "0");
+  seconds = String(seconds).padStart(2, "0");
+  milliseconds = String(milliseconds).padStart(2, "0");
+  milliseconds = milliseconds.slice(-2);
+
+  hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
+  minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
+  secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
+  timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
 }
 
 function reset_or_not(rating) {
