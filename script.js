@@ -49,22 +49,38 @@ let isRunning = false;
 
 // Pomodoro
 const pomo_timer_const = 0.1;
+
 let pomo_timer = pomo_timer_const;
-let pomo_timer_c = 0;
+let pomo_timer_unixt = 0;
 let pomo_timer_total = 0;
+let pomo_daily_total = 0;
+
+let ratingEldefault = document.getElementById("rating");
+let rating_default_value = ratingEldefault.value;
+// let f_rating = "flow"            // Distracted / OK / Focused / Flow
+let f_rating = rating_default_value;
 
 let work_block = 0;
 let break_block = 0;
-let f_rating = "Distracted"            // Distracted / OK / Focused / Flow
 
 let run_time_i = 38;
 let total_run_time_i = 0;
-let focus_rating_i = "Flow";
-// pomo(run_time_i, total_run_time_i, focus_rating_i);
+
+
 
 for (let i = 1; i < 99; i += 0.5) {
   console.log(i, "mins")
-  pomo(i, i, focus_rating_i);
+  pomo(i, i, f_rating);
+}
+
+function rating() {
+  var ratingEl = document.getElementById("rating");
+  var rating_value = ratingEl.value;
+  // var rating_text = ratingEl.options[ratingEl.selectedIndex].text;
+  console.log(rating_value);
+  f_rating = rating_value;
+  pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
+  start()
 }
 
 function test() {
@@ -75,7 +91,7 @@ function test() {
 function start() {
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
-    pomo_timer_c = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
+    pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
     timer = setInterval(update, 10);
     isRunning = true;
   }
@@ -103,13 +119,17 @@ function reset() {
 function update() {
   const currentTime = Date.now()
   pomo_timer_total = (pomo_timer_total + 1);
-  elapsedTime = pomo_timer_c - currentTime;
+  pomo_daily_total = (pomo_daily_total + 1);
+  elapsedTime = pomo_timer_unixt - currentTime;
   if (elapsedTime <= 0) {
     clearInterval(timer);
     console.log("Timer End");
-    console.log((pomo_timer_total / 100), "seconds");
+    console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
+    console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
+    console.log("The Current Rating was", f_rating)
     elapsedTime = 0;
     isRunning = false;
+    // pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
   }
 
   let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
@@ -159,17 +179,17 @@ const scale = (num, in_min, in_max, out_min, out_max) => {
 
 function pomo(run_time, total_run_time, focus_rating) {
   switch (focus_rating) {
-    case "Distracted":
+    case "distracted":
       total_run_time_i = 0;
       console.log("Dist. Starting new work block of", distracted_work_block_calc(run_time), "mins After a break of ", break_block_calc(run_time), " mins")
       break;
 
-    case "OK":
+    case "ok":
       total_run_time_i = 0;
       console.log("OK. Starting new work block for", ok_work_block_calc(run_time), "after a break of", break_block_calc(run_time), " mins");
       break;
 
-    case "Focused":
+    case "focused":
       if (focused_work_block_calc(total_run_time) == 0) {
         console.log("Foc. Starting a break for 30 mins")
         total_run_time_i = 0;
@@ -179,7 +199,7 @@ function pomo(run_time, total_run_time, focus_rating) {
       }
       break;
 
-    case "Flow":
+    case "flow":
       if (flow_work_block_calc(total_run_time) == 0) {
         console.log("Flo. Reached Max Focus Time, Starting a break for ", break_block_calc(total_run_time), " mins")
         total_run_time_i = 0;
