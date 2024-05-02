@@ -10,7 +10,7 @@
 
 <body>
 
-  <button class="toggle">Dark Mode</button>
+  <button class="toggle" onclick="toggle()">Dark Mode</button>
   <div class="clock-container">
     <div class="clock">
       <div class="needle hour"></div>
@@ -26,12 +26,22 @@
       <button id="stopBtn" onclick="stop()">Stop</button>
       <button id="resetBtn" onclick="reset()">Reset</button>
       <button id="testbtn" onclick="test()">Test</button>
-      <select name="rating" id="rating" onchange="rating()">
+      <select name="rating" id="rating" onclick="rating()">
         <option value="distracted">Distracted</option>
         <option value="ok">Okay-ish</option>
         <option value="focused">Focused</option>
         <option value="flow">Flow</option>
       </select>
+      <br>
+      <br>
+      <center>
+        <input type="number" id="userinput" value="10">
+        <button id="playBtn" onclick="play()">Play</button>
+        <button id="pauseBtn" onclick="pause()">Pause</button>
+      </center>
+      <br>
+    </div>
+    <div class="pomostat">
     </div>
 
   </div>

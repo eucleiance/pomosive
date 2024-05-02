@@ -40,6 +40,7 @@ const minuteEl = document.querySelector(".minute");
 const secondEl = document.querySelector(".second");
 const timeEl = document.querySelector(".time");
 const toggleEl = document.querySelector(".toggle");
+const pomostat = document.querySelector(".pomostat")
 
 // Stopwatch
 let timer = null;
@@ -48,12 +49,13 @@ let elapsedTime = 0;
 let isRunning = false;
 
 // Pomodoro
-const pomo_timer_const = 0.1;
+const pomo_timer_const = 5;
 
 let pomo_timer = pomo_timer_const;
 let pomo_timer_unixt = 0;
 let pomo_timer_total = 0;
 let pomo_daily_total = 0;
+let user_input = null;
 
 let ratingEldefault = document.getElementById("rating");
 let rating_default_value = ratingEldefault.value;
@@ -68,18 +70,28 @@ let total_run_time_i = 0;
 
 
 
-for (let i = 1; i < 99; i += 0.5) {
-  console.log(i, "mins")
-  pomo(i, i, f_rating);
-}
+// for (let i = 1; i < 99; i += 0.5) {
+//   console.log(i, "mins")
+//   pomo(i, i, f_rating);
+// }
+
 
 function rating() {
-  var ratingEl = document.getElementById("rating");
-  var rating_value = ratingEl.value;
+  let ratingEl = document.getElementById("rating");
+  let rating_value = ratingEl.value;
   // var rating_text = ratingEl.options[ratingEl.selectedIndex].text;
   console.log(rating_value);
   f_rating = rating_value;
+  console.log(pomo_timer, (pomo_timer_total / 100));
+  pomo(pomo_timer, (pomo_timer_total / 100), f_rating);
   pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
+
+  start()
+}
+
+function play() {
+  user_input = document.getElementById("userinput").value;
+  console.log(user_input);
   start()
 }
 
@@ -88,10 +100,12 @@ function test() {
   console.log(Date.now())
   console.log((elapsedTime / 60000) % 60)
 }
+
 function start() {
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
-    pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
+    pomo_timer_unixt = (Date.now() + (user_input * 60 * 1000)) - elapsedTime;
+    // pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
     timer = setInterval(update, 10);
     isRunning = true;
   }
@@ -100,7 +114,7 @@ function stop() {
   if (isRunning) {
     clearInterval(timer);
     elapsedTime = Date.now() - startTime;
-    console.log(elapsedTime / 1000);
+    console.log(elapsedTime / 6000);
     isRunning = false;
   }
 }
@@ -115,12 +129,17 @@ function reset() {
   secondEl.style.transform = null;
 }
 
-
 function update() {
   const currentTime = Date.now()
   pomo_timer_total = (pomo_timer_total + 1);
   pomo_daily_total = (pomo_daily_total + 1);
   elapsedTime = pomo_timer_unixt - currentTime;
+  pomostat.innerHTML =
+    ` Cons. Pomo: ${Math.round(pomo_timer_total / 100)} sec
+    <br>
+      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+    `
+
   if (elapsedTime <= 0) {
     clearInterval(timer);
     console.log("Timer End");
@@ -129,7 +148,6 @@ function update() {
     console.log("The Current Rating was", f_rating)
     elapsedTime = 0;
     isRunning = false;
-    // pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
   }
 
   let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
@@ -158,16 +176,27 @@ function reset_or_not(rating) {
   }
 }
 
-toggleEl.addEventListener("click", (e) => {
+function toggle() {
   const html = document.querySelector("html");
   if (html.classList.contains("dark")) {
     html.classList.remove("dark");
-    e.target.innerHTML = "Dark Mode";
+    toggleEl.innerHTML = "Dark Mode";
   } else {
     html.classList.add("dark");
-    e.target.innerHTML = "Light Mode";
+    toggleEl.innerHTML = "Light Mode";
   }
-})
+}
+
+// toggleEl.addEventListener("click", (e) => {
+//   const html = document.querySelector("html");
+//   if (html.classList.contains("dark")) {
+//     html.classList.remove("dark");
+//     e.target.innerHTML = "Dark Mode";
+//   } else {
+//     html.classList.add("dark");
+//     e.target.innerHTML = "Light Mode";
+//   }
+// })
 
 
 const scale = (num, in_min, in_max, out_min, out_max) => {
@@ -181,12 +210,12 @@ function pomo(run_time, total_run_time, focus_rating) {
   switch (focus_rating) {
     case "distracted":
       total_run_time_i = 0;
-      console.log("Dist. Starting new work block of", distracted_work_block_calc(run_time), "mins After a break of ", break_block_calc(run_time), " mins")
+      console.log("Dist. Starting new work block of", distracted_work_block_calc(total_run_time), "mins After a break of ", break_block_calc(total_run_time), " mins")
       break;
 
     case "ok":
       total_run_time_i = 0;
-      console.log("OK. Starting new work block for", ok_work_block_calc(run_time), "after a break of", break_block_calc(run_time), " mins");
+      console.log("OK. Starting new work block for", ok_work_block_calc(total_run_time), "after a break of", break_block_calc(total_run_time), " mins");
       break;
 
     case "focused":
