@@ -22,22 +22,24 @@
       00:00:00:00
     </div>
     <div id="controls">
-      <button id="startBtn" onclick="start()">Start</button>
-      <button id="stopBtn" onclick="stop()">Stop</button>
-      <button id="resetBtn" onclick="reset()">Reset</button>
-      <button id="testbtn" onclick="test()">Test</button>
-      <select name="rating" id="rating" onclick="rating()">
-        <option value="distracted">Distracted</option>
-        <option value="ok">Okay-ish</option>
-        <option value="focused">Focused</option>
-        <option value="flow">Flow</option>
-      </select>
-      <br>
+      <!-- <button id="startBtn" onclick="start()">Start</button> -->
+      <!-- <button id="stopBtn" onclick="stop()">Stop</button> -->
+      <center>
+        <select name="rating" id="rating" onclick="rating()">
+          <option value="distracted">Distracted</option>
+          <option value="ok">Okay-ish</option>
+          <option value="focused">Focused</option>
+          <option value="flow">Flow</option>
+        </select>
+      </center>
       <br>
       <center>
         <input type="number" id="userinput" value="10">
-        <button id="playBtn" onclick="play()">Play</button>
-        <button id="pauseBtn" onclick="pause()">Pause</button>
+        <button id="timerControlBtn" onclick="timerControl()">Start</button>
+        <!-- <button id="playBtn" onclick="play()">Start</button> -->
+        <!-- <button id="pauseBtn" onclick="pause()">Pause</button> -->
+        <button id="resetBtn" onclick="reset()">Reset</button>
+        <!-- <button id="testbtn" onclick="test()">Test</button> -->
       </center>
       <br>
     </div>

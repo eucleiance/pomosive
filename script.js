@@ -41,6 +41,7 @@ const secondEl = document.querySelector(".second");
 const timeEl = document.querySelector(".time");
 const toggleEl = document.querySelector(".toggle");
 const pomostat = document.querySelector(".pomostat")
+const controlBtn = document.getElementById("timerControlBtn");
 
 // Stopwatch
 let timer = null;
@@ -56,6 +57,7 @@ let pomo_timer_unixt = 0;
 let pomo_timer_total = 0;
 let pomo_daily_total = 0;
 let user_input = null;
+let break_block = 0;
 
 let ratingEldefault = document.getElementById("rating");
 let rating_default_value = ratingEldefault.value;
@@ -63,7 +65,6 @@ let rating_default_value = ratingEldefault.value;
 let f_rating = rating_default_value;
 
 let work_block = 0;
-let break_block = 0;
 
 let run_time_i = 38;
 let total_run_time_i = 0;
@@ -77,16 +78,19 @@ let total_run_time_i = 0;
 
 
 function rating() {
-  let ratingEl = document.getElementById("rating");
-  let rating_value = ratingEl.value;
-  // var rating_text = ratingEl.options[ratingEl.selectedIndex].text;
-  console.log(rating_value);
-  f_rating = rating_value;
-  console.log(pomo_timer, (pomo_timer_total / 100));
-  pomo(pomo_timer, (pomo_timer_total / 100), f_rating);
-  pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
+  if (!isRunning) {
+    let ratingEl = document.getElementById("rating");
+    let rating_value = ratingEl.value;
+    // var rating_text = ratingEl.options[ratingEl.selectedIndex].text;
+    console.log(rating_value);
+    f_rating = rating_value;
+    console.log((pomo_timer_total / 100), "mins");
+    pomo(pomo_timer, (pomo_timer_total / 100), f_rating);
+    pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
+    controlBtn.innerHTML = "Pause";
+    start()
+  }
 
-  start()
 }
 
 function play() {
@@ -111,10 +115,41 @@ function test() {
   console.log((elapsedTime / 60000) % 60)
 }
 
+
+function breakFn() {
+  if (reset_or_not(f_rating)) {
+    break_block = break_block_calc(Math.round(pomo_timer_total / 100))
+    console.log("Starting Break of ", break_block, "minutes")
+    timerStartFn(break_block);
+  }
+}
+
+function reset_or_not(rating) {
+  if (rating == "distracted" || rating == "ok") {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function timerStartFn(timer_duration) {
+  if (!isRunning) {
+    startTime = Date.now() - elapsedTime;
+    pomo_timer_unixt = (Date.now() + (timer_duration * 1000)) - elapsedTime;
+    // pomo_timer_unixt = (Date.now() + (timer_duration * 60 * 1000)) - elapsedTime;
+    timer = setInterval(update, 10);
+    isRunning = true;
+  }
+}
+
+
+
 function start() {
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
-    pomo_timer_unixt = (Date.now() + (user_input * 60 * 1000)) - elapsedTime;
+    pomo_timer_unixt = (Date.now() + (user_input * 1000)) - elapsedTime;
+    // pomo_timer_unixt = (Date.now() + (user_input * 60 * 1000)) - elapsedTime;
     // pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
     timer = setInterval(update, 10);
     isRunning = true;
@@ -139,6 +174,12 @@ function reset() {
   hourEl.style.transform = null;
   minuteEl.style.transform = null;
   secondEl.style.transform = null;
+  controlBtn.innerHTML = "Start";
+  pomostat.innerHTML =
+    ` Cons. Pomo: 0 sec
+    <br>
+      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+    `
 }
 
 function update() {
@@ -160,6 +201,8 @@ function update() {
     console.log("The Current Rating was", f_rating)
     elapsedTime = 0;
     isRunning = false;
+    controlBtn.innerHTML = "Start";
+
   }
 
   let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
@@ -179,14 +222,6 @@ function update() {
   timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
 }
 
-function reset_or_not(rating) {
-  if (rating == "distracted" || rating == "ok") {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
 
 function toggle() {
   const html = document.querySelector("html");
@@ -198,6 +233,18 @@ function toggle() {
     toggleEl.innerHTML = "Light Mode";
   }
 }
+
+function timerControl() {
+  if (!isRunning) {
+    controlBtn.innerHTML = "Pause";
+    play();
+  }
+  else {
+    controlBtn.innerHTML = "Resume";
+    pause();
+  }
+}
+
 
 // toggleEl.addEventListener("click", (e) => {
 //   const html = document.querySelector("html");
@@ -223,11 +270,13 @@ function pomo(run_time, total_run_time, focus_rating) {
     case "distracted":
       total_run_time_i = 0;
       console.log("Dist. Starting new work block of", distracted_work_block_calc(total_run_time), "mins After a break of ", break_block_calc(total_run_time), " mins")
+      user_input = distracted_work_block_calc(total_run_time);
       break;
 
     case "ok":
       total_run_time_i = 0;
       console.log("OK. Starting new work block for", ok_work_block_calc(total_run_time), "after a break of", break_block_calc(total_run_time), " mins");
+      user_input = ok_work_block_calc(total_run_time);
       break;
 
     case "focused":
@@ -237,6 +286,7 @@ function pomo(run_time, total_run_time, focus_rating) {
       }
       else {
         console.log("Foc. Resuming Work Block for ", focused_work_block_calc(total_run_time), " mins")
+        user_input = focused_work_block_calc(total_run_time);
       }
       break;
 
@@ -247,6 +297,7 @@ function pomo(run_time, total_run_time, focus_rating) {
       }
       else {
         console.log("Flo. Starting Work Block for ", flow_work_block_calc(total_run_time), " mins")
+        user_input = flow_work_block_calc(total_run_time);
       }
       break;
   }
