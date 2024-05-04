@@ -115,14 +115,6 @@ function test() {
 }
 
 
-function breakFn() {
-  if (reset_or_not(f_rating)) {
-    break_block = break_block_calc(Math.round(pomo_timer_total / 100))
-    console.log("Starting Break of ", break_block, "minutes")
-    timerStartFn(break_block);
-  }
-}
-
 function reset_or_not(rating) {
   if (rating == "distracted" || rating == "ok") {
     return true;
@@ -141,6 +133,22 @@ function timerStartFn(timer_duration) {
     isRunning = true;
   }
 }
+
+// const controlBtn = document.getElementById("timerControlBtn");
+
+function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {
+  if (reset_or_not(focusRating)) {
+    let break_block = break_block_calc(Math.round(last_cons_pomo_length / 100))
+    startEvent.addEventListener("click", function() {
+      console.log("Starting a Break : Clicked Start after a work block end");
+
+    })
+
+    console.log("Starting Break of ", break_block, "minutes")
+    timerStartFn(break_block);
+  }
+}
+
 
 
 
@@ -169,16 +177,7 @@ function reset() {
   startTime = 0;
   elapsedTime = 0;
   isRunning = false;
-  timeEl.innerHTML = `00:00:00:00`
-  hourEl.style.transform = null;
-  minuteEl.style.transform = null;
-  secondEl.style.transform = null;
-  controlBtn.innerHTML = "Start";
-  pomostat.innerHTML =
-    ` Cons. Pomo: 0 sec
-    <br>
-      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
-    `
+  UIUpdater(elapsedTime, "reset")
 }
 
 function update() {
@@ -186,11 +185,6 @@ function update() {
   pomo_timer_total = (pomo_timer_total + 1);
   pomo_daily_total = (pomo_daily_total + 1);
   elapsedTime = pomo_timer_unixt - currentTime;
-  pomostat.innerHTML =
-    ` Cons. Pomo: ${Math.round(pomo_timer_total / 100)} sec
-    <br>
-      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
-    `
 
   if (elapsedTime <= 0) {
     clearInterval(timer);
@@ -204,21 +198,45 @@ function update() {
 
   }
 
-  let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-  let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-  let seconds = Math.floor(elapsedTime / 1000 % 60);
-  let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+  UIUpdater(elapsedTime, "update")
+}
 
-  hours = String(hours).padStart(2, "0");
-  minutes = String(minutes).padStart(2, "0");
-  seconds = String(seconds).padStart(2, "0");
-  milliseconds = String(milliseconds).padStart(2, "0");
-  milliseconds = milliseconds.slice(-2);
+function UIUpdater(elapsedTime, event) {
+  if (event == "update") {
+    let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+    let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+    let seconds = Math.floor(elapsedTime / 1000 % 60);
+    let milliseconds = Math.floor(elapsedTime % 1000 / 10);
 
-  hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
-  minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
-  secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
-  timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+    hours = String(hours).padStart(2, "0");
+    minutes = String(minutes).padStart(2, "0");
+    seconds = String(seconds).padStart(2, "0");
+    milliseconds = String(milliseconds).padStart(2, "0");
+    milliseconds = milliseconds.slice(-2);
+
+    hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
+    minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
+    secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
+    timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+
+    pomostat.innerHTML =
+      ` Cons. Pomo: ${Math.round(pomo_timer_total / 100)} sec
+    <br>
+      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+    `
+  }
+  else if (event == "reset") {
+    timeEl.innerHTML = `00:00:00:00`
+    hourEl.style.transform = null;
+    minuteEl.style.transform = null;
+    secondEl.style.transform = null;
+    controlBtn.innerHTML = "Start";
+    pomostat.innerHTML =
+      ` Cons. Pomo: 0 sec
+    <br>
+      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+    `
+  }
 }
 
 
