@@ -136,11 +136,12 @@ function timerStartFn(timer_duration) {
 
 // const controlBtn = document.getElementById("timerControlBtn");
 
-function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {
-  if (reset_or_not(focusRating)) {
+function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {    // timer_status = isRunning
+  if (reset_or_not(focusRating) && timer_status == false) {
     let break_block = break_block_calc(Math.round(last_cons_pomo_length / 100))
     startEvent.addEventListener("click", function() {
       console.log("Starting a Break : Clicked Start after a work block end");
+      setInterval(update, 10);
 
     })
 
@@ -152,7 +153,8 @@ function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {
 
 
 
-function start() {
+
+function start() {        // Start has a bug when resuming after a pause, cycles from two different timers
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
     pomo_timer_unixt = (Date.now() + (user_input * 1000)) - elapsedTime;
@@ -200,6 +202,22 @@ function update() {
 
   UIUpdater(elapsedTime, "update")
 }
+
+function update_v2(timer_length_unix, event) {
+  const timeNow = Date.now()
+  let timeElapsed = timer_length_unix - timeNow;
+  if (timeElapsed <= 0) {
+    timeElapsed = 0;
+    return false;
+  }
+  UIUpdater(timeElapsed, event)
+}
+
+
+
+
+
+
 
 function UIUpdater(elapsedTime, event) {
   if (event == "update") {
