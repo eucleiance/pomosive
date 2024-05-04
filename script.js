@@ -90,7 +90,6 @@ function rating() {
     controlBtn.innerHTML = "Pause";
     start()
   }
-
 }
 
 function play() {
