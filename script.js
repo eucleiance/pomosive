@@ -91,8 +91,18 @@ function rating() {
 
 function play() {
   user_input = document.getElementById("userinput").value;
-  console.log(user_input);
+  // console.log(user_input);
+  // pomo(pomo_timer, (user_input / 100), f_rating);
   start()
+}
+
+function pause() {
+  if (isRunning) {
+    clearInterval(timer);
+    elapsedTime = Date.now() - startTime;
+    // console.log(elapsedTime / 6000);
+    isRunning = false;
+  }
 }
 
 function test() {
@@ -110,14 +120,16 @@ function start() {
     isRunning = true;
   }
 }
+
 function stop() {
   if (isRunning) {
     clearInterval(timer);
     elapsedTime = Date.now() - startTime;
-    console.log(elapsedTime / 6000);
+    // console.log(elapsedTime / 6000);
     isRunning = false;
   }
 }
+
 function reset() {
   clearInterval(timer);
   startTime = 0;
