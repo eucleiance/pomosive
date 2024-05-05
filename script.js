@@ -94,8 +94,8 @@ function rating() {
 
 function play() {
   user_input = document.getElementById("userinput").value;
-  // console.log(user_input);
-  // pomo(pomo_timer, (user_input / 100), f_rating);
+  console.log(user_input);
+  pomo(pomo_timer, (user_input / 100), f_rating);
   start()
 }
 
@@ -153,17 +153,18 @@ function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {
 
 
 
-
 function start() {        // Start has a bug when resuming after a pause, cycles from two different timers
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
-    pomo_timer_unixt = (Date.now() + (user_input * 1000)) - elapsedTime;
+    pomo_timer_unixt = (Date.now() + (user_input * 10000)) - elapsedTime;
     // pomo_timer_unixt = (Date.now() + (user_input * 60 * 1000)) - elapsedTime;
     // pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
     timer = setInterval(update, 10);
+    // timer = setInterval(update_v2(pomo_timer_unixt, "distracted"))
     isRunning = true;
   }
 }
+
 
 function stop() {
   if (isRunning) {
@@ -203,16 +204,40 @@ function update() {
   UIUpdater(elapsedTime, "update")
 }
 
+function updatePure(pomoTimerTotal, pomoDailyTotal, runningStatus) {
+  const timeNow = Date.now();
+  pomoTimerTotal = (pomoTimerTotal + 1);
+  pomoDailyTotal = (pomoDailyTotal + 1);
+  let timeElapsed = unix_timer_length - timeNow;
+}
+
+
+function start_v2(runningStatus, timeElapsed, userTimeInput) {
+  if (!runningStatus) {
+    let startTime = Date.now() - timeElapsed;
+    let unix_timer_length = (Date.now() + (userTimeInput * 10000)) - timeElapsed;
+    let timer = setInterval(update(), 10);
+    runningStatus = true;
+    return { startTime, unix_timer_length, timer, runningStatus };
+  }
+}
+
 function update_v2(timer_length_unix, event) {
   const timeNow = Date.now()
   let timeElapsed = timer_length_unix - timeNow;
   if (timeElapsed <= 0) {
     timeElapsed = 0;
-    return false;
+    clearInterval(timer);
+    console.log("Timer End");
+    console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
+    console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
+    console.log("The Current Rating was", f_rating)
+
+    isRunning = false;
+    // return false;
   }
   UIUpdater(timeElapsed, event)
 }
-
 
 
 
