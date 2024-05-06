@@ -1,39 +1,3 @@
-// 5 Ratings 
-// Distracted -> I want to or started doing smth else
-// Okay-ish -> I'm sort of exploring my work
-// Focused - Getting the hang of it -> I'm not reaching for my phone
-// Flow - I'm highly motivated -> I don't wanna take a break
-
-// Start with 5 min work block
-// Rate it
-// If Distracted, Lower Work Block Time - by 1/2 -> 2.5 mins
-// Rate it 
-// If Okay-ish -> Bump it up by 4x to 10 mins -> After a break of 1/3 of the work block
-// Rate it 
-// If Okay-ish -> Bump it up by 2x to 20 mins -> After a break of 1/3 of the work block
-// Rate it 
-// If Flowing -> Bump it up by 2x to 40 mins -> After a break of 1/3 of the work block
-// Rate it-
-// If the pomo has been going on for 90 mins -> Forcibly initiate a break of 30 mins
-
-// Increment Rules
-// Distracted -> Divide by 2 
-
-// Okay-ish
-// 2.5 mins -> 10 mins -> 3 mins  -> 5 mins
-// 10 mins  -> 20 mins -> 6 mins  -> 10 mins
-// 20 mins  -> 40 mins -> 13 mins -> 15 mins
-// 40 mins  -> 90 mins -> 30 mins -> 30 mins
-
-// Focused 
-// 2.5 mins -> 10 mins -> No Break
-// 10 mins  -> 20 mins -> No Break
-// 20 mins  -> 40 mins -> No Break
-
-// Break Tip
-// Do something that is autonomous and doesn't require any thinking
-
-
 // Analog Clock
 const hourEl = document.querySelector(".hour");
 const minuteEl = document.querySelector(".minute");
@@ -47,16 +11,23 @@ const controlBtn = document.getElementById("timerControlBtn");
 let timer = null;
 let startTime = 0;
 let elapsedTime = 0;
+let timeElapsed_B = 0;
 let isRunning = false;
 
 // Pomodoro
 const pomo_timer_const = 5;
 
-let pomo_timer = pomo_timer_const;
+// let pomo_timer = pomo_timer_const;
 let pomo_timer_unixt = 0;
+let break_timer_unixt = 0;
 let pomo_timer_total = 0;
 let pomo_daily_total = 0;
-let user_input = null;
+let pomo_length = null;
+let break_length = null;
+let break_timer_total = 0;
+let break_daily_total = 0;
+
+
 let break_block = 0;
 
 let ratingEldefault = document.getElementById("rating");
@@ -69,13 +40,22 @@ let work_block = 0;
 let run_time_i = 38;
 let total_run_time_i = 0;
 
-
-
-// for (let i = 1; i < 99; i += 0.5) {
-//   console.log(i, "mins")
-//   pomo(i, i, f_rating);
-// }
-
+function breakUpdate() {
+  const currentTime = Date.now()
+  pomo_timer_total = (pomo_timer_total + 1);
+  elapsedTime = pomo_timer_unixt - currentTime;
+  if (elapsedTime <= 0) {
+    clearInterval(pomo_timer);
+    console.log("Timer End");
+    console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
+    console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
+    console.log("The Current Rating was", f_rating)
+    elapsedTime = 0;
+    isRunning = false;
+    controlBtn.innerHTML = "Start";
+  }
+  UIUpdater(elapsedTime, "update")
+}
 
 function rating() {
   if (!isRunning) {
@@ -85,23 +65,26 @@ function rating() {
     console.log(rating_value);
     f_rating = rating_value;
     console.log((pomo_timer_total / 100), "mins");
-    pomo(pomo_timer, (pomo_timer_total / 100), f_rating);
+    // pomo((pomo_timer_total / 100), f_rating);
     pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
-    controlBtn.innerHTML = "Pause";
-    start()
+
+    // controlBtn.innerHTML = "Pause";
+    // start()
   }
 }
 
 function play() {
-  user_input = document.getElementById("userinput").value;
-  console.log(user_input);
-  pomo(pomo_timer, (user_input), f_rating);
+  if (pomo_daily_total <= 0) {
+    pomo_length = document.getElementById("userinput").value;
+    console.log(pomo_length, "mins");
+  }
+  pomo((pomo_length), f_rating);
   start()
 }
 
 function pause() {
   if (isRunning) {
-    clearInterval(timer);
+    clearInterval(pomo_timer);
     elapsedTime = Date.now() - startTime;
     // console.log(elapsedTime / 6000);
     isRunning = false;
@@ -124,76 +107,49 @@ function reset_or_not(rating) {
   }
 }
 
-function timerStartFn(timer_duration) {
-  if (!isRunning) {
-    startTime = Date.now() - elapsedTime;
-    pomo_timer_unixt = (Date.now() + (timer_duration * 1000)) - elapsedTime;
-    // pomo_timer_unixt = (Date.now() + (timer_duration * 60 * 1000)) - elapsedTime;
-    timer = setInterval(update, 10);
-    isRunning = true;
-  }
-}
-
-// const controlBtn = document.getElementById("timerControlBtn");
-
-// function breakFn(timer_status, last_cons_pomo_length, startEvent, focusRating) {    // timer_status = isRunning
-//   if (reset_or_not(focusRating) && timer_status == false) {
-//     let break_block = break_block_calc(Math.round(last_cons_pomo_length / 100))
-//     startEvent.addEventListener("click", function() {
-//       console.log("Starting a Break : Clicked Start after a work block end");
-//       setInterval(update, 10);
-//
-//     })
-//
-//     console.log("Starting Break of ", break_block, "minutes")
-//     timerStartFn(break_block);
-//   }
-// }
-
-
-
 
 function start() {        // Start has a bug when resuming after a pause, cycles from two different timers
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
-    pomo_timer_unixt = (Date.now() + (user_input * 1000)) - elapsedTime;
-    // pomo_timer_unixt = (Date.now() + (user_input * 60 * 1000)) - elapsedTime;
-    // pomo_timer_unixt = (Date.now() + (pomo_timer * 60 * 1000)) - elapsedTime;
-    timer = setInterval(update, 10);
-    // timer = setInterval(update_v2(pomo_timer_unixt, "distracted"))
+    startTime = Date.now() - timeElapsed_B;
+
+    break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;
+    pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;
+    if (break_length != 0) {
+      break_timer = setInterval(updateBreak, 10);
+    }
+    // pomo_timer_unixt = (Date.now() + (pomo_length * 60 * 1000)) - elapsedTime;
+    // break_timer = setInterval(updateBreak, 10);
+    pomo_timer = setInterval(update, 10);
     isRunning = true;
   }
 }
 
 
-
-
-
-function stop() {
-  if (isRunning) {
-    clearInterval(timer);
-    elapsedTime = Date.now() - startTime;
-    // console.log(elapsedTime / 6000);
-    isRunning = false;
+function updateBreak() {
+  const timeNow_B = Date.now();
+  break_timer_total = (break_timer_total + 1);
+  break_daily_total = (break_daily_total + 1);
+  timeElapsed_B = break_timer_unixt - timeNow_B;
+  if (timeElapsed_B <= 0) {
+    clearInterval(break_timer);
+    console.log("---");
+    console.log("Break Ended");
+    console.log("---");
+    timeElapsed_B = 0;
   }
+  UIUpdater(timeElapsed_B, "break")
 }
 
-function reset() {
-  clearInterval(timer);
-  startTime = 0;
-  elapsedTime = 0;
-  isRunning = false;
-  UIUpdater(elapsedTime, "reset")
-}
+
 
 function update() {
   const currentTime = Date.now()
   pomo_timer_total = (pomo_timer_total + 1);
   pomo_daily_total = (pomo_daily_total + 1);
   elapsedTime = pomo_timer_unixt - currentTime;
-
   if (elapsedTime <= 0) {
-    clearInterval(timer);
+    clearInterval(pomo_timer);
     console.log("Timer End");
     console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
     console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
@@ -201,51 +157,31 @@ function update() {
     elapsedTime = 0;
     isRunning = false;
     controlBtn.innerHTML = "Start";
-
   }
-
   UIUpdater(elapsedTime, "update")
 }
 
-function updatePure(pomoTimerTotal, pomoDailyTotal, runningStatus) {
-  const timeNow = Date.now();
-  pomoTimerTotal = (pomoTimerTotal + 1);
-  pomoDailyTotal = (pomoDailyTotal + 1);
-  let timeElapsed = unix_timer_length - timeNow;
-  if (timeElapsed <= 0) {
-    clearInterval(timer);
-    timeElapsed = 0;
-    runningStatus = false;
-  }
-}
 
-function start_v2(runningStatus, timeElapsed, userTimeInput) {
-  if (!runningStatus) {
-    let startTime = Date.now() - timeElapsed;
-    let unix_timer_length = (Date.now() + (userTimeInput * 10000)) - timeElapsed;
-    let timer = setInterval(update(), 10);
-    runningStatus = true;
-    return { startTime, unix_timer_length, timer, runningStatus };
-  }
-}
 
-function update_v2(timer_length_unix, event) {
-  const timeNow = Date.now()
-  let timeElapsed = timer_length_unix - timeNow;
-  if (timeElapsed <= 0) {
-    timeElapsed = 0;
-    clearInterval(timer);
-    console.log("Timer End");
-    console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
-    console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
-    console.log("The Current Rating was", f_rating)
 
+
+
+function stop() {
+  if (isRunning) {
+    clearInterval(pomo_timer);
+    elapsedTime = Date.now() - startTime;
+    // console.log(elapsedTime / 6000);
     isRunning = false;
-    // return false;
   }
-  UIUpdater(timeElapsed, event)
 }
 
+function reset() {
+  clearInterval(pomo_timer);
+  startTime = 0;
+  elapsedTime = 0;
+  isRunning = false;
+  UIUpdater(elapsedTime, "reset")
+}
 
 
 
@@ -285,6 +221,13 @@ function UIUpdater(elapsedTime, event) {
       ` Cons. Pomo: 0 sec
     <br>
       Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+    `
+  }
+  else if (event == "break") {
+    pomostat.innerHTML =
+      ` Current Break: ${Math.round(break_timer_total / 100)} sec
+    <br>
+      Daily Break: ${Math.round(break_daily_total / 100)} sec
     `
   }
 }
@@ -332,39 +275,45 @@ const scale = (num, in_min, in_max, out_min, out_max) => {
 
 
 
-function pomo(run_time, total_run_time, focus_rating) {
+function pomo(total_run_time, focus_rating) {
   switch (focus_rating) {
     case "distracted":
-      total_run_time_i = 0;
+      pomo_timer_total = 0;
       console.log("Dist. Starting new work block of", distracted_work_block_calc(total_run_time), "mins After a break of ", break_block_calc(total_run_time), " mins")
-      user_input = distracted_work_block_calc(total_run_time);
+      pomo_length = distracted_work_block_calc(total_run_time);
+      break_length = break_block_calc(total_run_time);
       break;
 
     case "ok":
-      total_run_time_i = 0;
+      pomo_timer_total = 0;
       console.log("OK. Starting new work block for", ok_work_block_calc(total_run_time), "after a break of", break_block_calc(total_run_time), " mins");
-      user_input = ok_work_block_calc(total_run_time);
+      pomo_length = ok_work_block_calc(total_run_time);
+      break_length = break_block_calc(total_run_time);
       break;
 
     case "focused":
       if (focused_work_block_calc(total_run_time) == 0) {
         console.log("Foc. Starting a break for 30 mins")
-        total_run_time_i = 0;
+        pomo_timer_total = 0;
+        break_length = 30;
       }
       else {
         console.log("Foc. Resuming Work Block for ", focused_work_block_calc(total_run_time), " mins")
-        user_input = focused_work_block_calc(total_run_time);
+        pomo_length = focused_work_block_calc(total_run_time);
+        break_length = 0;
       }
       break;
 
     case "flow":
       if (flow_work_block_calc(total_run_time) == 0) {
         console.log("Flo. Reached Max Focus Time, Starting a break for ", break_block_calc(total_run_time), " mins")
-        total_run_time_i = 0;
+        pomo_timer_total = 0;
+        break_length = break_block_calc(total_run_time)
       }
       else {
         console.log("Flo. Starting Work Block for ", flow_work_block_calc(total_run_time), " mins")
-        user_input = flow_work_block_calc(total_run_time);
+        pomo_length = flow_work_block_calc(total_run_time);
+        break_length = 0;
       }
       break;
   }
@@ -433,4 +382,5 @@ function break_block_calc(r_time) {
 // function rating() {
 //   console.log("yo", selectedValue)
 // }
+
 
