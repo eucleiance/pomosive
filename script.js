@@ -209,8 +209,12 @@ function updatePure(pomoTimerTotal, pomoDailyTotal, runningStatus) {
   pomoTimerTotal = (pomoTimerTotal + 1);
   pomoDailyTotal = (pomoDailyTotal + 1);
   let timeElapsed = unix_timer_length - timeNow;
+  if (timeElapsed <= 0) {
+    clearInterval(timer);
+    timeElapsed = 0;
+    runningStatus = false;
+  }
 }
-
 
 function start_v2(runningStatus, timeElapsed, userTimeInput) {
   if (!runningStatus) {
