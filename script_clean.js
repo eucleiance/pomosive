@@ -108,7 +108,7 @@ function reset_or_not(rating) {
 }
 
 
-function start() {        // Start has a bug when resuming after a pause, cycles from two different timers
+async function start() {
   if (!isRunning) {
     startTime = Date.now() - elapsedTime;
     startTime = Date.now() - timeElapsed_B;
@@ -116,12 +116,30 @@ function start() {        // Start has a bug when resuming after a pause, cycles
     break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;
     pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;
     if (break_length != 0) {
-      break_timer = setInterval(updateBreak, 10);
+
+      // break_timer = setInterval(updateBreak, 10);
+      // await new Promise(resolve => setTimeout(resolve, break_length * 1000));
+      // pomo_timer = setInterval(update, 10);
+
+      // Start break timer
+      await new Promise(resolve => {
+        break_timer = setInterval(() => {
+          updateBreak();
+          if (timeElapsed_B <= 0) {
+            clearInterval(break_timer);
+            resolve();
+          }
+        }, 10);
+      });
+
+      // Start pomo timer after break is finished
+      await new Promise(resolve => setTimeout(resolve, pomo_length * 1000));
+      pomo_timer = setInterval(update, 10);
+      isRunning = true;
+
     }
     // pomo_timer_unixt = (Date.now() + (pomo_length * 60 * 1000)) - elapsedTime;
     // break_timer = setInterval(updateBreak, 10);
-    pomo_timer = setInterval(update, 10);
-    isRunning = true;
   }
 }
 
