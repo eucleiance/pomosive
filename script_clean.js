@@ -14,11 +14,11 @@ let startTime_B = 0;
 let elapsedTime = 0;
 let timeElapsed_B = 0;
 let isRunning = false;
+let isRunning_B = false;
 
 // Pomodoro
 const pomo_timer_const = 5;
 
-let breakEnd = false;
 
 let pomo_timer_unixt = 0;
 let break_timer_unixt = 0;
@@ -120,10 +120,11 @@ function start() {
 
     // break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
     // pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Converting break time to unix
+    if (!isRunning_B) {
+      start_break();
+    }
 
-    start_break();
     start_pomo();
-
     // if (break_length != 0) {
     //   if (breakEnd == false) {
     //     break_timer = setInterval(updateBreak(), 10);
@@ -157,6 +158,7 @@ function start_break() {
   break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
   break_timer = setInterval(updateBreak, 5);
   // console.log(break_timer_unixt)
+  isRunning_B = true;
 
 }
 
@@ -173,8 +175,7 @@ function updateBreak() {
     // console.log("Break Ended");
     // console.log("---");
     timeElapsed_B = 0;
-    breakEnd = true;
-    return false;
+    isRunning_B = false;
   }
   UIUpdater(timeElapsed_B, "break")
 }
