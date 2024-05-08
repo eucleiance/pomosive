@@ -79,11 +79,14 @@ function rating() {
 
 
 function pause() {
-  if (isRunning) {
+  if (isRunning_B) {
     clearInterval(pomo_timer);
     elapsedTime = Date.now() - startTime_P;
-    // console.log(elapsedTime / 6000);
     isRunning = false;
+
+    clearInterval(break_timer);
+    timeElapsed_B = Date.now() - startTime_B;
+    isRunning_B = false;
   }
 }
 
@@ -106,7 +109,6 @@ function reset_or_not(rating) {
 function play() {
   if (pomo_daily_total <= 0) {      // Getting User Input Value if it's the first pomo of the day
     pomo_length = document.getElementById("userinput").value;
-    // console.log(pomo_length, "mins");
   }
   console.log("---------------------------------------")
   pomo((pomo_length), f_rating);    // Details about 1st pomo
@@ -128,14 +130,12 @@ function start_pomo() {
 }
 
 function start_break() {
-  if (break_daily_total != 0) {
+  if (break_daily_total != 0) {     // Resetting the break_timer_total if it's not the first run of the day
     break_timer_total = 0;
   }
-  // console.log("-- Executing start_break() function --")
-  // console.log(Date.now(), "timenow", break_length, "mins", timeElapsed_B, "elapsed");
+  startTime_B = Date.now() - timeElapsed_B;
   break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Multiply by 60 again to change it to mins
   break_timer = setInterval(updateBreak, 5);
-  // console.log(break_timer_unixt)
   isRunning_B = true;
 
 }
@@ -154,7 +154,37 @@ function updateBreak() {
     isRunning_B = false;
     start_pomo();
   }
-  UIUpdater(timeElapsed_B, "break")
+  // UIUpdater(timeElapsed_B, "break")
+  let hours = Math.floor(timeElapsed_B / (1000 * 60 * 60));
+  let minutes = Math.floor(timeElapsed_B / (1000 * 60) % 60);
+  let seconds = Math.floor(timeElapsed_B / 1000 % 60);
+  let milliseconds = Math.floor(timeElapsed_B % 1000 / 10);
+
+  hours = String(hours).padStart(2, "0");
+  minutes = String(minutes).padStart(2, "0");
+  seconds = String(seconds).padStart(2, "0");
+  milliseconds = String(milliseconds).padStart(2, "0");
+  milliseconds = milliseconds.slice(-2);
+
+  hourEl.style.transform = `translate(-50%, -100%) rotate(${scale(hours, 0, 11, 0, 360)}deg)`
+  minuteEl.style.transform = `translate(-50%, -100%) rotate(${scale(minutes, 0, 59, 0, 360)}deg)`
+  secondEl.style.transform = `translate(-50%, -100%) rotate(${scale(seconds, 0, 59, 0, 360)}deg)`
+  timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
+
+  pomostat.innerHTML =
+    ` Cons. Pomo: ${String(Math.ceil((pomo_timer_total / 100) * 2) / 2).padEnd(3, ".0")} sec
+    <br>
+      Daily Pomo: ${String(Math.ceil((pomo_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
+    <br>
+      Recent Break: ${String(Math.ceil((break_timer_total / 100) * 2) / 2).padEnd(3, ".0")} sec
+    <br>
+      Daily Break: ${String(Math.ceil((break_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
+    `
+
+
+
+
+
 }
 
 
@@ -219,13 +249,13 @@ function UIUpdater(elapsedTime, event) {
     timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
 
     pomostat.innerHTML =
-      ` Cons. Pomo: ${Math.ceil((pomo_timer_total / 100) * 2) / 2} sec
+      ` Cons. Pomo: ${String(Math.ceil((pomo_timer_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     <br>
-      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
+      Daily Pomo: ${String(Math.ceil((pomo_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     <br>
-      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
+      Recent Break: ${String(Math.ceil((break_timer_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     <br>
-      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
+      Daily Break: ${String(Math.ceil((break_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     `
   }
   else if (event == "reset") {
@@ -237,26 +267,17 @@ function UIUpdater(elapsedTime, event) {
     pomostat.innerHTML =
       ` Cons. Pomo: 0 sec
     <br>
-      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
+      Daily Pomo: ${String(Math.ceil((pomo_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     <br>
-      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
+      Recent Break: ${String(Math.ceil((break_timer_total / 100) * 2) / 2).padEnd(3, ".0")} sec
     <br>
-      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
+      Daily Break: ${String(Math.ceil((break_daily_total / 100) * 2) / 2).padEnd(3, ".0")} sec
 
 
     `
   }
-  else if (event == "break") {
-    pomostat.innerHTML =
-      ` Cons. Pomo: ${Math.ceil((pomo_timer_total / 100) * 2) / 2} sec
-    <br>
-      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
-    <br>
-      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
-    <br>
-      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
-    `
-  }
+  // else if (event == "break") {
+  // }
 }
 
 
@@ -272,7 +293,7 @@ function toggle() {
 }
 
 function timerControl() {
-  if (!isRunning) {
+  if (!isRunning_B) {
     controlBtn.innerHTML = "Pause";
     play();
   }
