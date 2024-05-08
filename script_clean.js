@@ -114,37 +114,15 @@ function play() {
 }
 
 function start() {
-  if (!isRunning) {   // If Not Running
-    // startTime_P = Date.now() - elapsedTime;       // Start Time of Pomodoro = Time now - time elapsed
-    // startTime_B = Date.now() - timeElapsed_B;     // Start Time of Break = Time now - time elapsed
-
-    // break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
-    // pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Converting break time to unix
-    if (!isRunning_B) {
-      start_break();
-    }
-
-    start_pomo();
-    // if (break_length != 0) {
-    //   if (breakEnd == false) {
-    //     break_timer = setInterval(updateBreak(), 10);
-    //   }
-    // }
-    // if (breakEnd == true) {
-    //   pomo_timer = setInterval(update, 10);
-    //   isRunning = true;
-    // }
-
-    // pomo_timer_unixt = (Date.now() + (pomo_length * 60 * 1000)) - elapsedTime;
-    // break_timer = setInterval(updateBreak, 10);
+  if (!isRunning && !isRunning_B) {   // If Not Running
+    start_break();
   }
 }
 
 
 function start_pomo() {
   startTime_P = Date.now() - elapsedTime;       // Start Time of Pomodoro = Time now - time elapsed
-  pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Converting break time to unix
-
+  pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Multiply by 60 again to change it to mins
   pomo_timer = setInterval(update, 5);
   isRunning = true;
 }
@@ -155,14 +133,12 @@ function start_break() {
   }
   // console.log("-- Executing start_break() function --")
   // console.log(Date.now(), "timenow", break_length, "mins", timeElapsed_B, "elapsed");
-  break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
+  break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Multiply by 60 again to change it to mins
   break_timer = setInterval(updateBreak, 5);
   // console.log(break_timer_unixt)
   isRunning_B = true;
 
 }
-
-
 
 function updateBreak() {
   const timeNow_B = Date.now();
@@ -176,6 +152,7 @@ function updateBreak() {
     // console.log("---");
     timeElapsed_B = 0;
     isRunning_B = false;
+    start_pomo();
   }
   UIUpdater(timeElapsed_B, "break")
 }
