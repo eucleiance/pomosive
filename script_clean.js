@@ -9,7 +9,8 @@ const controlBtn = document.getElementById("timerControlBtn");
 
 // Stopwatch
 let timer = null;
-let startTime = 0;
+let startTime_P = 0;
+let startTime_B = 0;
 let elapsedTime = 0;
 let timeElapsed_B = 0;
 let isRunning = false;
@@ -17,13 +18,15 @@ let isRunning = false;
 // Pomodoro
 const pomo_timer_const = 5;
 
-// let pomo_timer = pomo_timer_const;
+let breakEnd = false;
+
 let pomo_timer_unixt = 0;
 let break_timer_unixt = 0;
 let pomo_timer_total = 0;
 let pomo_daily_total = 0;
 let pomo_length = null;
 let break_length = null;
+
 let break_timer_total = 0;
 let break_daily_total = 0;
 
@@ -37,8 +40,9 @@ let f_rating = rating_default_value;
 
 let work_block = 0;
 
-let run_time_i = 38;
-let total_run_time_i = 0;
+let pomo_timer = pomo_timer_const;
+let break_timer = break_block_calc(pomo_timer_total);
+
 
 function breakUpdate() {
   const currentTime = Date.now()
@@ -62,9 +66,9 @@ function rating() {
     let ratingEl = document.getElementById("rating");
     let rating_value = ratingEl.value;
     // var rating_text = ratingEl.options[ratingEl.selectedIndex].text;
-    console.log(rating_value);
+    // console.log(rating_value);
     f_rating = rating_value;
-    console.log((pomo_timer_total / 100), "mins");
+    // console.log((pomo_timer_total / 100), "mins");
     // pomo((pomo_timer_total / 100), f_rating);
     pomo_timer_total = reset_or_not(f_rating) ? 0 : pomo_timer_total;
 
@@ -73,29 +77,21 @@ function rating() {
   }
 }
 
-function play() {
-  if (pomo_daily_total <= 0) {
-    pomo_length = document.getElementById("userinput").value;
-    console.log(pomo_length, "mins");
-  }
-  pomo((pomo_length), f_rating);
-  start()
-}
 
 function pause() {
   if (isRunning) {
     clearInterval(pomo_timer);
-    elapsedTime = Date.now() - startTime;
+    elapsedTime = Date.now() - startTime_P;
     // console.log(elapsedTime / 6000);
     isRunning = false;
   }
 }
 
-function test() {
-  // let time_in_mins = (pomo_timer_c - Date.now()) / 60000
-  console.log(Date.now())
-  console.log((elapsedTime / 60000) % 60)
-}
+// function test() {
+//   // let time_in_mins = (pomo_timer_c - Date.now()) / 60000
+//   console.log(Date.now())
+//   console.log((elapsedTime / 60000) % 60)
+// }
 
 
 function reset_or_not(rating) {
@@ -107,54 +103,78 @@ function reset_or_not(rating) {
   }
 }
 
+function play() {
+  if (pomo_daily_total <= 0) {      // Getting User Input Value if it's the first pomo of the day
+    pomo_length = document.getElementById("userinput").value;
+    // console.log(pomo_length, "mins");
+  }
+  console.log("---------------------------------------")
+  pomo((pomo_length), f_rating);    // Details about 1st pomo
+  start()
+}
 
-async function start() {
-  if (!isRunning) {
-    startTime = Date.now() - elapsedTime;
-    startTime = Date.now() - timeElapsed_B;
+function start() {
+  if (!isRunning) {   // If Not Running
+    // startTime_P = Date.now() - elapsedTime;       // Start Time of Pomodoro = Time now - time elapsed
+    // startTime_B = Date.now() - timeElapsed_B;     // Start Time of Break = Time now - time elapsed
 
-    break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;
-    pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;
-    if (break_length != 0) {
+    // break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
+    // pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Converting break time to unix
 
-      // break_timer = setInterval(updateBreak, 10);
-      // await new Promise(resolve => setTimeout(resolve, break_length * 1000));
-      // pomo_timer = setInterval(update, 10);
+    start_break();
+    start_pomo();
 
-      // Start break timer
-      await new Promise(resolve => {
-        break_timer = setInterval(() => {
-          updateBreak();
-          if (timeElapsed_B <= 0) {
-            clearInterval(break_timer);
-            resolve();
-          }
-        }, 10);
-      });
+    // if (break_length != 0) {
+    //   if (breakEnd == false) {
+    //     break_timer = setInterval(updateBreak(), 10);
+    //   }
+    // }
+    // if (breakEnd == true) {
+    //   pomo_timer = setInterval(update, 10);
+    //   isRunning = true;
+    // }
 
-      // Start pomo timer after break is finished
-      await new Promise(resolve => setTimeout(resolve, pomo_length * 1000));
-      pomo_timer = setInterval(update, 10);
-      isRunning = true;
-
-    }
     // pomo_timer_unixt = (Date.now() + (pomo_length * 60 * 1000)) - elapsedTime;
     // break_timer = setInterval(updateBreak, 10);
   }
 }
 
 
+function start_pomo() {
+  startTime_P = Date.now() - elapsedTime;       // Start Time of Pomodoro = Time now - time elapsed
+  pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Converting break time to unix
+
+  pomo_timer = setInterval(update, 5);
+  isRunning = true;
+}
+
+function start_break() {
+  if (break_daily_total != 0) {
+    break_timer_total = 0;
+  }
+  // console.log("-- Executing start_break() function --")
+  // console.log(Date.now(), "timenow", break_length, "mins", timeElapsed_B, "elapsed");
+  break_timer_unixt = (Date.now() + (break_length * 1000)) - timeElapsed_B;   // Converting pomo time to unix
+  break_timer = setInterval(updateBreak, 5);
+  // console.log(break_timer_unixt)
+
+}
+
+
+
 function updateBreak() {
   const timeNow_B = Date.now();
-  break_timer_total = (break_timer_total + 1);
-  break_daily_total = (break_daily_total + 1);
+  break_timer_total = (break_timer_total + 0.5);
+  break_daily_total = (break_daily_total + 0.5);
   timeElapsed_B = break_timer_unixt - timeNow_B;
   if (timeElapsed_B <= 0) {
     clearInterval(break_timer);
-    console.log("---");
-    console.log("Break Ended");
-    console.log("---");
+    // console.log("---");
+    // console.log("Break Ended");
+    // console.log("---");
     timeElapsed_B = 0;
+    breakEnd = true;
+    return false;
   }
   UIUpdater(timeElapsed_B, "break")
 }
@@ -163,14 +183,14 @@ function updateBreak() {
 
 function update() {
   const currentTime = Date.now()
-  pomo_timer_total = (pomo_timer_total + 1);
-  pomo_daily_total = (pomo_daily_total + 1);
+  pomo_timer_total = (pomo_timer_total + 0.5);
+  pomo_daily_total = (pomo_daily_total + 0.5);
   elapsedTime = pomo_timer_unixt - currentTime;
   if (elapsedTime <= 0) {
     clearInterval(pomo_timer);
-    console.log("Timer End");
-    console.log("Total Time Ran =", (pomo_timer_total / 100), "seconds");
-    console.log("Today's Daily Total =", (pomo_daily_total / 100), "seconds");
+    // console.log("Timer End");
+    console.log("Total Time Ran =", Math.ceil((pomo_timer_total / 100) * 2) / 2, "seconds");
+    console.log("Today's Daily Total =", Math.ceil((pomo_daily_total / 100) * 2) / 2, "seconds");
     console.log("The Current Rating was", f_rating)
     elapsedTime = 0;
     isRunning = false;
@@ -187,7 +207,7 @@ function update() {
 function stop() {
   if (isRunning) {
     clearInterval(pomo_timer);
-    elapsedTime = Date.now() - startTime;
+    elapsedTime = Date.now() - startTime_P;
     // console.log(elapsedTime / 6000);
     isRunning = false;
   }
@@ -195,14 +215,11 @@ function stop() {
 
 function reset() {
   clearInterval(pomo_timer);
-  startTime = 0;
+  startTime_P = 0;
   elapsedTime = 0;
   isRunning = false;
   UIUpdater(elapsedTime, "reset")
 }
-
-
-
 
 
 function UIUpdater(elapsedTime, event) {
@@ -224,9 +241,13 @@ function UIUpdater(elapsedTime, event) {
     timeEl.innerHTML = `${hours}:${minutes}:${seconds}:${milliseconds}`
 
     pomostat.innerHTML =
-      ` Cons. Pomo: ${Math.round(pomo_timer_total / 100)} sec
+      ` Cons. Pomo: ${Math.ceil((pomo_timer_total / 100) * 2) / 2} sec
     <br>
-      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
+    <br>
+      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
+    <br>
+      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
     `
   }
   else if (event == "reset") {
@@ -238,14 +259,24 @@ function UIUpdater(elapsedTime, event) {
     pomostat.innerHTML =
       ` Cons. Pomo: 0 sec
     <br>
-      Daily Pomo: ${Math.round(pomo_daily_total / 100)} sec
+      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
+    <br>
+      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
+    <br>
+      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
+
+
     `
   }
   else if (event == "break") {
     pomostat.innerHTML =
-      ` Current Break: ${Math.round(break_timer_total / 100)} sec
+      ` Cons. Pomo: ${Math.ceil((pomo_timer_total / 100) * 2) / 2} sec
     <br>
-      Daily Break: ${Math.round(break_daily_total / 100)} sec
+      Daily Pomo: ${Math.ceil((pomo_daily_total / 100) * 2) / 2} sec
+    <br>
+      Current Break: ${Math.ceil((break_timer_total / 100) * 2) / 2} sec
+    <br>
+      Daily Break: ${Math.ceil((break_daily_total / 100) * 2) / 2} sec
     `
   }
 }
