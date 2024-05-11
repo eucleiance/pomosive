@@ -15,6 +15,7 @@ let elapsedTime = 0;
 let timeElapsed_B = 0;
 let isRunning = false;
 let isRunning_B = false;
+let enablePause = true;
 
 // Pomodoro
 const pomo_timer_const = 5;
@@ -79,14 +80,16 @@ function rating() {
 
 
 function pause() {
-  if (isRunning_B) {
-    clearInterval(pomo_timer);
-    elapsedTime = Date.now() - startTime_P;
-    isRunning = false;
-
+  if (isRunning_B && !isRunning) {
     clearInterval(break_timer);
     timeElapsed_B = Date.now() - startTime_B;
     isRunning_B = false;
+    // enablePause = false;
+  }
+  else if (!isRunning_B && isRunning) {
+    clearInterval(pomo_timer);
+    elapsedTime = Date.now() - startTime_P;
+    isRunning = false;
   }
 }
 
@@ -95,7 +98,7 @@ function pause() {
 //   console.log(Date.now())
 //   console.log((elapsedTime / 60000) % 60)
 // }
-
+let lastRun = "break";
 
 function reset_or_not(rating) {
   if (rating == "distracted" || rating == "ok") {
@@ -116,13 +119,22 @@ function play() {
 }
 
 function start() {
-  if (!isRunning && !isRunning_B) {   // If Not Running
-    start_break();
+  if (!isRunning || !isRunning_B) {
+    if (lastRun == "pomo") {
+      start_break()
+    }
+    else if (lastRun == "break") {
+      start_pomo()
+    }
+    // if (!isRunning && !isRunning_B) {   // If Not Running
+    //   start_break();
+    // }
   }
 }
 
 
 function start_pomo() {
+  lastRun = "pomo";
   startTime_P = Date.now() - elapsedTime;       // Start Time of Pomodoro = Time now - time elapsed
   pomo_timer_unixt = (Date.now() + (pomo_length * 1000)) - elapsedTime;       // Multiply by 60 again to change it to mins
   pomo_timer = setInterval(update, 5);
@@ -130,6 +142,7 @@ function start_pomo() {
 }
 
 function start_break() {
+  lastRun = "break";
   if (break_daily_total != 0) {     // Resetting the break_timer_total if it's not the first run of the day
     break_timer_total = 0;
   }
@@ -182,9 +195,6 @@ function updateBreak() {
     `
 
 
-
-
-
 }
 
 
@@ -202,7 +212,8 @@ function update() {
     console.log("The Current Rating was", f_rating)
     elapsedTime = 0;
     isRunning = false;
-    controlBtn.innerHTML = "Start";
+    enablePause = false;
+    // controlBtn.innerHTML = "Start";
   }
   UIUpdater(elapsedTime, "update")
 }
