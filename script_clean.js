@@ -98,7 +98,12 @@ function pause() {
 //   console.log(Date.now())
 //   console.log((elapsedTime / 60000) % 60)
 // }
-let lastRun = "break";
+
+
+
+
+let lastAction = "none";
+let lastRun = "break";      // Add more logic for the first run of the day
 
 function reset_or_not(rating) {
   if (rating == "distracted" || rating == "ok") {
@@ -110,6 +115,11 @@ function reset_or_not(rating) {
 }
 
 function play() {
+  if (lastAction == "play") {
+    console.log("Let the timer finish");
+    return;
+  } else lastAction = "play";
+
   if (pomo_daily_total <= 0) {      // Getting User Input Value if it's the first pomo of the day
     pomo_length = document.getElementById("userinput").value;
   }
@@ -159,6 +169,7 @@ function updateBreak() {
   break_daily_total = (break_daily_total + 0.5);
   timeElapsed_B = break_timer_unixt - timeNow_B;
   if (timeElapsed_B <= 0) {
+    // lastAction = "none";
     clearInterval(break_timer);
     // console.log("---");
     // console.log("Break Ended");
@@ -205,6 +216,7 @@ function update() {
   pomo_daily_total = (pomo_daily_total + 0.5);
   elapsedTime = pomo_timer_unixt - currentTime;
   if (elapsedTime <= 0) {
+    // lastAction = "none";
     clearInterval(pomo_timer);
     // console.log("Timer End");
     console.log("Total Time Ran =", Math.ceil((pomo_timer_total / 100) * 2) / 2, "seconds");
