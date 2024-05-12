@@ -80,6 +80,11 @@ function rating() {
 
 
 function pause() {
+  if (lastAction == "pause") {
+    console.log("Already Paused")
+    return
+  } else lastAction = "pause";
+
   if (isRunning_B && !isRunning) {
     clearInterval(break_timer);
     timeElapsed_B = Date.now() - startTime_B;
@@ -98,7 +103,6 @@ function pause() {
 //   console.log(Date.now())
 //   console.log((elapsedTime / 60000) % 60)
 // }
-
 
 
 
@@ -169,6 +173,7 @@ function updateBreak() {
   break_daily_total = (break_daily_total + 0.5);
   timeElapsed_B = break_timer_unixt - timeNow_B;
   if (timeElapsed_B <= 0) {
+    // lastAction = "pause";
     // lastAction = "none";
     clearInterval(break_timer);
     // console.log("---");
@@ -216,7 +221,7 @@ function update() {
   pomo_daily_total = (pomo_daily_total + 0.5);
   elapsedTime = pomo_timer_unixt - currentTime;
   if (elapsedTime <= 0) {
-    // lastAction = "none";
+    lastAction = "pause";
     clearInterval(pomo_timer);
     // console.log("Timer End");
     console.log("Total Time Ran =", Math.ceil((pomo_timer_total / 100) * 2) / 2, "seconds");
